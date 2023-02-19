@@ -1,1 +1,12 @@
-(inserire CB1)
+/* comment **/
+read[x,y];
+assign 10 to a,b;
+print[1,+(x,y,a,b),2];
+conditional [ option (&& > x a > y b) do print[x,y] ] end;
+while (> x 0)
+	conditional [
+		option (> x y) do {assign - x 2 to x; print[x]}
+		option (== x y) do {assign 0 to x; print[x]}
+	]
+	else {assign - x 1 to x; print[x]}
+	end

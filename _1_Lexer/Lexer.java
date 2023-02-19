@@ -147,20 +147,17 @@ public class Lexer {
             case '/':   
                 readch(br);
                 if(peek == '*') {
-                    while(true) {
+                    char prec = ' ';
+                    while(!(prec == '*' && peek == '/')) {
+                        prec = peek;
                         readch(br);
-                        if(peek == '*') {
-                            readch(br);
-                            if(peek == '/') {
-                                readch(br);
-                                return lexical_scan(br);
-                            }
-                        }
-                        else if(peek == (char) Tag.EOF || peek == '/') {
+                        if(peek == (char) Tag.EOF) {
                             System.err.println("Error in comment.");
                             return null;
                         }
                     }
+                    readch(br);
+                    return lexical_scan(br);
                 }
                 else if(peek == '/') {
                     while(true) {

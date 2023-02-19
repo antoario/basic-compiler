@@ -1,5 +1,8 @@
+/**
+ * The objective of the translator is the recognition of a simple programming language shown in class and the generation of bytecode executable by the Java Virtual Machine.
+ * It's used to not print "useless" goto instructions, you pass a boolean called jump and check if it is true, if it is, you invert the conditions.
+ */
 package _4_Translator;
-
 import _1_Lexer.*;
 import java.io.*;
 
@@ -17,15 +20,26 @@ public class NoGotoTranslator {
         move();
     }
 
+    /**
+     * Method that scrolls the string and prints the recognized token on the screen.
+     */
     void move() {
         look = lex.lexical_scan(pbr);
         System.out.println("token = " + look);
     }
 
+    /**
+     * Method to manage error.
+     * @param s string specifying in which method the error occurred.
+     */
     void error(String s) {
         throw new Error("near line " + Lexer.line + ": " + s);
     }
 
+    /**
+     * Compare the current character with the character passed in input and call move method.
+     * @param t character to compare.
+     */
     void match(int t) {
         if (look.tag == t) {
             if (look.tag != Tag.EOF) move();
@@ -33,7 +47,7 @@ public class NoGotoTranslator {
         else error("syntax error");
     }
 
-    // GUIDA: { Tag.ASSIGN, Tag.PRINT, Tag.READ, Tag.COND, Tag.WHILE, { }
+    // GUIDE: { Tag.ASSIGN, Tag.PRINT, Tag.READ, Tag.COND, Tag.WHILE, { }
     public void prog() {
         int label_next_prog;
         switch(look.tag) {
@@ -54,12 +68,13 @@ public class NoGotoTranslator {
                 } finally {
                     break;
                 }
+
             default:
                 error("in prog.");
         }
     }
 
-    // GUIDA: { Tag.ASSIGN, Tag.PRINT, Tag.READ, Tag.COND, Tag.WHILE, { }
+    // GUIDE: { Tag.ASSIGN, Tag.PRINT, Tag.READ, Tag.COND, Tag.WHILE, { }
     private void statlist() {
         switch(look.tag) {
             case Tag.ASSIGN:
@@ -71,13 +86,14 @@ public class NoGotoTranslator {
                 stat();
                 statlistp();
                 break;
+
             default:
                 error("in statlist.");
         }
 
     }
 
-    // GUIDA: { ;, }, Tag.EOF }
+    // GUIDE: { ;, }, Tag.EOF }
     private void statlistp() {
         switch(look.tag) {
             case ';':
@@ -85,15 +101,17 @@ public class NoGotoTranslator {
                 stat();
                 statlistp();
                 break;
+
             case '}':
             case Tag.EOF:
                 break;
+
             default:
                 error("in statlistp.");
         }
     }
 
-    // GUIDA: { Tag.ASSIGN, Tag.PRINT, Tag.READ, Tag.COND, Tag.WHILE, {, Tag.EOF }
+    // GUIDE: { Tag.ASSIGN, Tag.PRINT, Tag.READ, Tag.COND, Tag.WHILE, {, Tag.EOF }
     public void stat() {
         int label_start, label_continue, label_end;
         switch(look.tag) {
@@ -103,18 +121,21 @@ public class NoGotoTranslator {
                 match(Tag.TO);
                 idlist(OpCode.dup, -1, false);
                 break;
+
             case Tag.PRINT:
                 match(Tag.PRINT);
                 match('[');
                 exprlist(OpCode.invokestatic, 1, true);
                 match(']');
                 break;
+
             case Tag.READ:
                 match(Tag.READ);
                 match('[');
                 idlist(OpCode.invokestatic, 0, true);
                 match(']');
                 break;
+
             case Tag.COND:
                 label_end = code.newLabel();
                 match(Tag.COND);
@@ -125,6 +146,7 @@ public class NoGotoTranslator {
                 code.emitLabel(label_end);
                 match(Tag.END);
                 break;
+
             case Tag.WHILE:
                 label_start = code.newLabel();
                 label_continue = code.newLabel();
@@ -139,60 +161,64 @@ public class NoGotoTranslator {
                 code.emit(OpCode.GOto, label_start);
                 code.emitLabel(label_end);
                 break;
+
             case '{':
                 match('{');
                 statlist();
                 match('}');
                 break;
-            case Tag.EOF:
+
             default:
                 error("in stat.");
         }
     }
 
-    // GUIDA: { Tag.ELSE,  Tag.END }
+    // GUIDE: { Tag.ELSE,  Tag.END }
     private void condp() {
         switch(look.tag) {
             case Tag.ELSE:
                 match(Tag.ELSE);
                 stat();
                 break;
+
             case Tag.END:
                 break;
+
             default:
                 error("in condp.");
         }
     }
 
-    // GUIDA: { Tag.ID }
-    private void idlist(OpCode opcode, int p, boolean chiamato) {
+    // GUIDE: { Tag.ID }
+    private void idlist(OpCode opcode, int parameter, boolean justCalled) {
         int to_add;
         switch(look.tag) {
             case Tag.ID:
                 to_add = st.insertIf(((Word)look).lexeme);
                 match(Tag.ID);
-                if(OpCode.dup == opcode);
-                else if(chiamato || look.tag == ',') code.emit(opcode, p);
+                if(justCalled || look.tag == ',') code.emit(opcode, parameter);
                 code.emit(OpCode.istore, to_add);
-                idlistp(opcode, p, chiamato);
+                idlistp(opcode, parameter, justCalled);
                 break;
+
             default:
                 error("in idlist.");
         }
     }
 
-    // GUIDA: { ,, ;, ], },Tag.OPTION, Tag.END, Tag.EOF }
-    private void idlistp(OpCode opcode, int p, boolean chiamato) {
+    // GUIDE: { ,, ;, ], },Tag.OPTION, Tag.END, Tag.EOF }
+    private void idlistp(OpCode opcode, int parameter, boolean justCalled) {
         int to_add;
         switch(look.tag) {
             case ',':
                 match(',');
                 to_add = st.insertIf(((Word)look).lexeme);
                 match(Tag.ID);
-                if(chiamato || look.tag == ',') code.emit(opcode, p);
+                if(justCalled || look.tag == ',') code.emit(opcode, parameter);
                 code.emit(OpCode.istore, to_add);
-                idlistp(opcode, p, chiamato);
+                idlistp(opcode, parameter, justCalled);
                 break;
+
             case ';':
             case ']':
             case '}':
@@ -200,45 +226,49 @@ public class NoGotoTranslator {
             case Tag.END:
             case Tag.EOF:
                 break;
+
             default:
                 error("in idlistp.");
         }
     }
 
-    // GUIDA: { Tag.OPTION }
+    // GUIDE: { Tag.OPTION }
     private void optlist(int label_end) {
         int label_next_optlist;
         switch(look.tag) {
             case Tag.OPTION:
                 label_next_optlist = code.newLabel();
-                optitem(label_next_optlist, label_end);
+                optitem(label_end);
                 code.emitLabel(label_next_optlist);
                 optlistp(label_end);
                 break;
+
             default:
                 error("in optlist.");
         }
     }
 
-    // GUIDA: { Tag.OPTION, ] }
+    // GUIDE: { Tag.OPTION, ] }
     private void optlistp(int label_end) {
         int label_next_optlist;
         switch(look.tag) {
             case Tag.OPTION:
                 label_next_optlist = code.newLabel();
-                optitem(label_next_optlist, label_end);
+                optitem(label_end);
                 code.emitLabel(label_next_optlist);
                 optlistp(label_end);
                 break;
+
             case ']':
                 break;
+
             default:
                 error("in optlistp.");
         }
     }
 
-    // GUIDA: { Tag.OPTION }
-    private void optitem(int label_next_optlist, int label_end) {
+    // GUIDE: { Tag.OPTION }
+    private void optitem(int label_end) {
         int label_continue;
         switch(look.tag) {
             case Tag.OPTION:
@@ -252,21 +282,23 @@ public class NoGotoTranslator {
                 stat();
                 code.emit(OpCode.GOto, label_end);
                 break;
+
             default:
                 error("in optitem.");
         }
     }
 
-    // GUIDA: { Tag.RELOP }
+    // GUIDE: { Tag.RELOP }
     private void bexpr(int label_continue, boolean salto) {
-        OpCode op;
+        String type = "";
+        OpCode opcode;
         switch(look.tag) {
             case Tag.RELOP:
-                String type = ((Word)look).lexeme;
+                type = ((Word)look).lexeme;
                 match(Tag.RELOP);
                 expr();
                 expr();
-                op = switch (type) {
+                opcode = switch (type) {
                     case "<" -> OpCode.if_icmplt;
                     case "<=" -> OpCode.if_icmple;
                     case "==" -> OpCode.if_icmpeq;
@@ -276,7 +308,7 @@ public class NoGotoTranslator {
                     default -> null;
                 };
                 if(!salto) {
-                    op = switch (type) {
+                    opcode = switch (type) {
                         case "if_icmpne" -> OpCode.if_icmpeq;
                         case "if_icmpeq" -> OpCode.if_icmpne;
                         case "if_icmpge" -> OpCode.if_icmplt;
@@ -286,14 +318,15 @@ public class NoGotoTranslator {
                         default -> null;
                     };
                 }
-                code.emit(op, label_continue);
+                code.emit(opcode, label_continue);
                 break;
+
             default:
                 error("in bexpr.");
         }
     }
 
-    // GUIDA: { +, -, *, /, Tag.NUM, Tag.ID }
+    // GUIDE: { +, -, *, /, Tag.NUM, Tag.ID }
     private void expr() {
         switch(look.tag) {
             case '+':
@@ -302,39 +335,45 @@ public class NoGotoTranslator {
                 exprlist(OpCode.iadd, -1, false);
                 match(')');
                 break;
+
             case '-':
                 match('-');
                 expr();
                 expr();
                 code.emit(OpCode.isub);
                 break;
+
             case '*':
                 match('*');
                 match('(');
                 exprlist(OpCode.imul, -1, false);
                 match(')');
                 break;
+
             case '/':
                 match('/');
                 expr();
                 expr();
                 code.emit(OpCode.idiv);
                 break;
+
             case Tag.NUM:
                 code.emit(OpCode.ldc, ((NumberTok)look).getValue());
                 match(Tag.NUM);
                 break;
+
             case Tag.ID:
                 code.emit(OpCode.iload, st.lookupAddress(((Word)look).lexeme));
                 match(Tag.ID);
                 break;
+
             default:
                 error("in expr.");
         }
     }
 
-    // GUIDA: { +, -, *, /, Tag.NUM, Tag.ID }
-    private void exprlist(OpCode opcode, int p, boolean chiamato) {
+    // GUIDE: { +, -, *, /, Tag.NUM, Tag.ID }
+    private void exprlist(OpCode opcode, int parameter, boolean justCalled) {
         switch(look.tag) {
             case '+':
             case '-':
@@ -343,26 +382,29 @@ public class NoGotoTranslator {
             case Tag.NUM:
             case Tag.ID:
                 expr();
-                if(chiamato) code.emit(opcode, p);
-                exprlistp(opcode, p, chiamato);
+                if(justCalled) code.emit(opcode, parameter);
+                exprlistp(opcode, parameter);
                 break;
+
             default:
                 error("in exprlist.");
         }
     }
 
-    // GUIDA{ ,, ,),] }
-    private void exprlistp(OpCode opcode, int p, boolean chiamato) {
+    // GUIDE: { ,, ,),] }
+    private void exprlistp(OpCode opcode, int parameter) {
         switch(look.tag) {
             case ',':
                 match(',');
                 expr();
-                code.emit(opcode, p);
-                exprlistp(opcode, p, chiamato);
+                code.emit(opcode, parameter);
+                exprlistp(opcode, parameter);
                 break;
+
             case ')':
             case ']':
                 break;
+
             default:
                 error("in exprlistp.");
         }
@@ -370,7 +412,7 @@ public class NoGotoTranslator {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "esame.lft";
+        String path = "Input.lft";
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             NoGotoTranslator traduttore = new NoGotoTranslator(lex, br);

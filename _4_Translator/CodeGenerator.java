@@ -1,5 +1,4 @@
 package _4_Translator;
-
 import java.util.LinkedList;
 import java.io.*;
 
