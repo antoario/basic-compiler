@@ -4,10 +4,15 @@
  * Where P(productions) are:
  * - ⟨start⟩  -->  ⟨expr⟩ EOF
  * - ⟨expr⟩   -->  ⟨term⟩ ⟨exprp⟩
- * - ⟨exprp⟩  -->  + ⟨term⟩ ⟨exprp⟩ | - ⟨term⟩ ⟨exprp⟩ | ε
+ * - ⟨exprp⟩  -->  + ⟨term⟩ ⟨exprp⟩
+ *            -->  - ⟨term⟩ ⟨exprp⟩
+ *            -->  ε
  * - ⟨term⟩   -->  ⟨fact⟩ ⟨termp⟩
- * - ⟨termp⟩  -->  * ⟨fact⟩ ⟨termp⟩ | / ⟨fact⟩ ⟨termp⟩ | ε
- * - ⟨fact⟩   -->  ( ⟨expr⟩ ) | NUM
+ * - ⟨termp⟩  -->  * ⟨fact⟩ ⟨termp⟩
+ *            -->  / ⟨fact⟩ ⟨termp⟩
+ *            -->  ε
+ * - ⟨fact⟩   -->  ( ⟨expr⟩ )
+ *            -->  NUM
  */
 package _2_Parser;
 import _1_Lexer.*;
@@ -41,8 +46,8 @@ public class ParserArithmeticExpressions {
     }
 
 	/**
-	 * 
-	 * @param t
+	 * Compare the current character with the character passed in input and call move method.
+	 * @param t character to compare.
 	 */
 	void match(int t) {
 		if (look.tag == t) {
@@ -51,7 +56,7 @@ public class ParserArithmeticExpressions {
 		else error("syntax error");
     }
 
-	// GUIDA: { (, Tag.NUM }
+	// GUIDE: { (, Tag.NUM }
     public void start() {
     	switch(look.tag) {
     		case '(':
@@ -59,12 +64,13 @@ public class ParserArithmeticExpressions {
     			expr();
         		match(Tag.EOF);
         		break;
+
         	default:
         		error("in start.");
     	}
     }
 
-	// GUIDA: { (, Tag.NUM }
+	// GUIDE: { (, Tag.NUM }
     private void expr() {
     	switch(look.tag) {
     		case '(':
@@ -72,12 +78,13 @@ public class ParserArithmeticExpressions {
     			term();
     			exprp();
         		break;
+
         	default:
         		error("in expr.");
     	}
     }
 
-	// GUIDA: { +, -, ), Tag.EOF }
+	// GUIDE: { +, -, ), Tag.EOF }
     private void exprp() {
 		switch (look.tag) {
 			case '+':
@@ -109,12 +116,13 @@ public class ParserArithmeticExpressions {
     			fact();
     			termp();
     			break;
+
     		default:
     			error("in term.");
     	}
     }
 
-	// GUIDA: { *, / , +, -, ), Tag.EOF }
+	// GUIDE: { *, / , +, -, ), Tag.EOF }
     private void termp() {
         switch(look.tag) {
         	case '*':
@@ -140,7 +148,7 @@ public class ParserArithmeticExpressions {
         }
     }
 
-	// GUIDA: { ( , Tag.NUM }
+	// GUIDE: { ( , Tag.NUM }
     private void fact() {
        switch(look.tag) {
        		case '(':
@@ -160,7 +168,7 @@ public class ParserArithmeticExpressions {
 		
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "esame.lft";
+        String path = "Input.lft";
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             ParserArithmeticExpressions parser = new ParserArithmeticExpressions(lex, br);
