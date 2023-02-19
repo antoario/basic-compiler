@@ -18,12 +18,12 @@ package _2_Parser;
 import _1_Lexer.*;
 import java.io.*;
 
-public class ParserArithmeticExpressions {
+public class ArithmeticExpressionsParser {
 	private Lexer lex;
 	private BufferedReader pbr;
     private Token look;
 
-    public ParserArithmeticExpressions(Lexer l, BufferedReader br) {
+    public ArithmeticExpressionsParser(Lexer l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -171,7 +171,7 @@ public class ParserArithmeticExpressions {
         String path = "Input.lft";
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            ParserArithmeticExpressions parser = new ParserArithmeticExpressions(lex, br);
+            ArithmeticExpressionsParser parser = new ArithmeticExpressionsParser(lex, br);
             parser.start();
             System.out.println("Input OK");
             br.close();

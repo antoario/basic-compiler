@@ -3,7 +3,7 @@ package _4_Translator;
 import _1_Lexer.*;
 import java.io.*;
 
-public class TranslatorNoGoto {
+public class NoGotoTranslator {
     private Lexer lex;
     private BufferedReader pbr;
     private Token look;
@@ -11,7 +11,7 @@ public class TranslatorNoGoto {
     SymbolTable st = new SymbolTable();
     CodeGenerator code = new CodeGenerator();
 
-    public TranslatorNoGoto(Lexer l, BufferedReader br) {
+    public NoGotoTranslator(Lexer l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -373,7 +373,7 @@ public class TranslatorNoGoto {
         String path = "esame.lft";
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            TranslatorNoGoto traduttore = new TranslatorNoGoto(lex, br);
+            NoGotoTranslator traduttore = new NoGotoTranslator(lex, br);
             traduttore.prog();
             System.out.println("Input OK");
             br.close();

@@ -2,7 +2,7 @@ package _4_Translator;
 import _1_Lexer.*;
 import java.io.*;
 
-public class TranslatorBoolean {
+public class BooleanTranslator {
     private Lexer lex;
     private BufferedReader pbr;
     private Token look;
@@ -10,7 +10,7 @@ public class TranslatorBoolean {
     SymbolTable st = new SymbolTable();
     CodeGenerator code = new CodeGenerator();
 
-    public TranslatorBoolean(Lexer l, BufferedReader br) {
+    public BooleanTranslator(Lexer l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -383,7 +383,7 @@ public class TranslatorBoolean {
         String path = "esame.lft";
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            TranslatorBoolean traduttore = new TranslatorBoolean(lex, br);
+            BooleanTranslator traduttore = new BooleanTranslator(lex, br);
             traduttore.prog();
             System.out.println("Input OK");
             br.close();
